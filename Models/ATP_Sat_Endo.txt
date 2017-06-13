@@ -1,0 +1,91 @@
+********** MODEL NAME
+ATP_Sat_Endo
+********** MODEL NOTES
+
+
+********** MODEL STATES
+d/dt(Ca) = vCa
+d/dt(ATP) = vATP
+d/dt(cAMP) = vCAMP
+
+d/dt(Res) = 0
+d/dt(Rel)= vRes_Rel - vRel_Exo + vExo_Rel
+d/dt(Exo)= vRel_Exo - vExo_Rel - vExo
+d/dt(Endo)=vCa_Endo-vEndo
+
+d/dt(Adiponectin)=vExo
+
+Ca(0)= basalCa
+ATP(0)= basalATP
+cAMP(0)= basalcAMP
+
+Res(0)= Res0
+Rel(0)= Rel0
+Exo(0)= Exo0
+Endo(0)=Endo0
+
+Adiponectin(0)=0
+********** MODEL PARAMETERS
+% Adiponektin Parameters
+krel= 1
+kexo= 1
+kCaATP=1
+kbasal= 1
+kCa2=1
+kATP2=1
+kEndo=1
+kCacAMP=1
+km=1
+
+%% Input speed
+kCa=0.01
+d1=1
+d2=1
+
+%% Input range (given in µm for Ca, mM for ATP and cAMP)
+
+basalCa=0.035
+basalATP=0.001
+basalcAMP=0.0001
+
+targetCa=1.5
+targetATP=3
+targetcAMP=0.1
+
+kattach=1
+********** MODEL VARIABLES
+%% Measurement variables
+u=Exo*kexo-kEndo*Endo
+u2=kEndo*Endo
+u3=Exo*kexo
+
+%% steady state values
+kcAMP=kCa*d1
+kATP=kCa*d2
+
+a=basalCa/(km+basalCa)*(kCa2+kATP2*basalATP) %vRes_Rel
+b=basalcAMP*(kbasal+basalCa/(km+basalCa)*basalATP*kCaATP) %vRel_Exo
+
+Res0=97
+Rel0=a*Res0*(1+krel/kexo)/b
+Exo0=a*Res0/kexo
+Endo0=kCacAMP*(basalcAMP*basalCa)/kEndo
+
+********** MODEL REACTIONS
+vCAMP=kcAMP*(-cAMP + basalcAMP + (targetcAMP - basalcAMP)*kattach)
+vCa=kCa*(-Ca + basalCa + (targetCa - basalCa)*kattach)
+vATP=kATP*(-ATP + basalATP + (targetATP - basalATP)*kattach)
+
+vRes_Rel= (Ca/(km+Ca)*(kCa2+kATP2*ATP))*Res
+vRel_Exo= cAMP*(kbasal+Ca/(km+Ca)*ATP*kCaATP)*Rel
+vExo_Rel= krel*Exo
+vExo= kexo*Exo
+
+vCa_Endo=kCacAMP*cAMP*Ca
+vEndo = kEndo*Endo
+********** MODEL FUNCTIONS
+
+
+********** MODEL EVENTS
+
+********** MODEL MATLAB FUNCTIONS
