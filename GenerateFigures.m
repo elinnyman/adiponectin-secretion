@@ -1,21 +1,8 @@
 warning off
 clear all
-%% Initial Setup. 
-
-% global model
-% global expData
-% global highCaExpData
-% global time
-% global highCaTime
-% global expData_cAMP
-% global time_cAMP
-% global validParameters
-% global dgf
-% global lb
-% global ub
-% global wTotalData
-
 clear mex
+
+%% Initial Setup. 
 
 if exist('../../Scripts/SimulateExperiments.m','file')
     cd ../..

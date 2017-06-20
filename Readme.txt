@@ -1,3 +1,8 @@
+---Notes regarding cloning of the repo----
+git lfs is necessary to dowload the large files, please install git lfs before cloning the repo. 
+If the repo has already been cloned, install git lfs and pull. 
+git lfs can be found at https://git-lfs.github.com/
+
 ---Introduction---
 To be able to run the files, MATLAB and IQM tools are necessary. 
 IQM tools can be aquired for free from http://www.intiquan.com/iqm-tools/
