@@ -2,58 +2,64 @@ warning off
 clear all
 %% Initial Setup. 
 
-global model
-global expData
-global highCaExpData
-global time
-global highCaTime
-global expData_cAMP
-global time_cAMP
-global validParameters
-global dgf
-global lb
-global ub
-global wTotalData
+% global model
+% global expData
+% global highCaExpData
+% global time
+% global highCaTime
+% global expData_cAMP
+% global time_cAMP
+% global validParameters
+% global dgf
+% global lb
+% global ub
+% global wTotalData
 
 clear mex
 
-load expData
-load highCaExpData
-load expData_cAMP
-
-if(regexp(pwd,'Adiponectin$'))
-    if ~exist('.\Plots\tmp','dir')
-        mkdir('.\Plots\tmp')
-    end
-else
-    disp('Wrong working directory. Please fix')
+if exist('../../Scripts/SimulateExperiments.m','file')
+    cd ../..
+elseif exist('../Scripts/SimulateExperiments.m','file')
+    cd ..
+elseif exist('../../../Scripts/SimulateExperiments.m','file')
+    cd ../../..
+elseif ~exist('./Scripts/SimulateExperiments.m','file')
+    error('Running from wrong folder, please change to root folder.')
     return
 end
+home=pwd;
+
+if ~exist('IQMmakeMEXmodel.m','file')
+    error('IQM tools missing, please install from http://www.intiquan.com/iqm-tools/.')
+    return
+end
+addpath('Data')
+addpath(genpath([pwd '/Models']))
+addpath('Scripts')
+d=0.1;
 
 %% Figure 2 Original+ATPdep
 wTotalData=0;
-model=@OriginalModel;
-% Initialization
-load('.\Models\OriginalModel\Results\opt(62.13), 170503-202614.mat')
+modelName='OriginalModel';
+load('./Models/OriginalModel/Results/opt(62.13), 170503-202614.mat')
+Initialization;
+cd(home)
 PlotFigures( optParam, 1, 1, 1, 0, 0, 0 )
 
-model=@ATPdep;
-load('.\Models\ATPdep\Results\opt(30.57), 170503-205819.mat')
-% optParam(end-5)=log(0.7);
-% optParam(end-5)=log(0.0034);
+modelName='ATPdep';
+load('./Models/ATPdep/Results/opt(30.57), 170503-205819.mat')
+Initialization;
+cd(home)
 PlotFigures( optParam, 1, 1, 1, 0, 0, 1 )
 
 %% Setup for final model figures 
 close all
-model=@ATP_Sat_Endo;
+modelName='ATP_Sat_Endo';
+load('./Models/ATP_Sat_Endo/Results/opt (10.59).mat')
+load('./Models/ATP_Sat_Endo/Results/validParameters, all.mat');
 wTotalData=1;
-d=0.1;
-load('.\Models\ATP_Sat_Endo\Results\validParameters, all6.mat');
-dgf=numel(expData.meanValues)+(numel(highCaTime)+numel(time_cAMP))*wTotalData-1;
-ub=log(1e4)*ones(1,size(validParameters.Parameters,2)-6);
-lb=-ub;
-lb=[lb log([0.0035 1-d 1-d 0.035 1e-3       1e-6 ])];
-ub=[ub log([0.7   1+d 1+d 0.23  1     0.1])];
+Initialization;
+cd(home)
 
 %% Figure 3 ATP_Sat_Endo
 PlotUncertainity(validParameters)
@@ -77,7 +83,7 @@ set(gca,'FontSize',15)
 set (gcf, 'PaperPositionMode','auto','Units', 'normalized', 'outerposition', [0.1,0.1,0.2,0.4]);  
 
 
-savefig('Figure 4, bars')
+savefig('./Plots/tmp/Figure 4, bars')
 print('./Plots./tmp/Figure 4, bars.pdf','-dpdf')
 print('./Plots/tmp/Figure 4, bars.png','-dpng')
 
@@ -85,12 +91,12 @@ print('./Plots/tmp/Figure 4, bars.png','-dpng')
 %% Figure 5 Prediction/validation
 % QuantifyPrediction; %Used to collected the prediction values in
 % "values.mat"
-load('.\Models\ATP_Sat_Endo\values.mat')
+load('./Models/ATP_Sat_Endo/values.mat')
 
 vp=validParameters;
 vp.Cost=validParameters.OriginalCost+validParameters.CaCost+validParameters.cAMPCost;
 vp(vp.Cost>chi2inv(0.95,dgf-size(vp.Parameters,2)),:)=[];
-ind = any(vp.Parameters>repmat(ub,height(vp),1),2) | any(vp.Parameters<repmat(lb,height(vp),1),2) | exp(vp.Parameters(:,end))>0.175662 | exp(vp.Parameters(:,end))<0.00198823;
+ind = any(vp.Parameters>repmat(ub,height(vp),1),2) | any(vp.Parameters<repmat(lb,height(vp),1),2) | exp(vp.Parameters(:,end))>0.1 | exp(vp.Parameters(:,end))<0.00198823;
 vp(ind,:)=[];
 values(ind,:)=[];
 change=[1 1 1;
@@ -110,7 +116,7 @@ close all
 vp=validParameters;
 vp.Cost=validParameters.OriginalCost+validParameters.CaCost+validParameters.cAMPCost;
 vp(vp.Cost>chi2inv(0.95,dgf-size(vp.Parameters,2))+10,:)=[];
-ind = any(vp.Parameters>repmat(ub,height(vp),1),2) | any(vp.Parameters<repmat(lb,height(vp),1),2) | exp(vp.Parameters(:,end))>0.175662 | exp(vp.Parameters(:,end))<0.00198823;
+ind = any(vp.Parameters>repmat(ub,height(vp),1),2) | any(vp.Parameters<repmat(lb,height(vp),1),2) | exp(vp.Parameters(:,end))>0.1 | exp(vp.Parameters(:,end))<0.00198823;
 vp(ind,:)=[];
 PlotInterval(vp,4)
 
