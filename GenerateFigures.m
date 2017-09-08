@@ -20,6 +20,10 @@ if ~exist('IQMmakeMEXmodel.m','file')
     error('IQM tools missing, please install from http://www.intiquan.com/iqm-tools/.')
     return
 end
+if ~exist('Plots/tmp/','dir')
+    mkdir('Plots/tmp/')
+end
+
 addpath('Data')
 addpath(genpath([pwd '/Models']))
 addpath('Scripts')
