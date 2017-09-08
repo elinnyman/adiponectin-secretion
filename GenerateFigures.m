@@ -29,6 +29,14 @@ addpath(genpath([pwd '/Models']))
 addpath('Scripts')
 d=0.1;
 
+clear mex
+cd Models
+files=dir('./Models/*.txt');
+for i=1:length(x)
+    IQMmakeMEXmodel(IQMmodel(x(i).name));
+end
+cd ..
+
 %% Figure 2 Original+ATPdep
 wTotalData=0;
 modelName='OriginalModel';
